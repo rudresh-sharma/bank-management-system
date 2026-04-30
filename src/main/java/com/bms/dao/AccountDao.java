@@ -40,7 +40,7 @@ public class AccountDao {
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     return Optional.of(map(resultSet));
-                }
+                }    
             }
         }
 
@@ -68,6 +68,16 @@ public class AccountDao {
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setBigDecimal(1, balance);
+            statement.setLong(2, accountId);
+            statement.executeUpdate();
+        }
+    }
+
+    public void updatePinHash(Connection connection, long accountId, String pinHash) throws SQLException {
+        String sql = "UPDATE accounts SET pin_hash = ? WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, pinHash);
             statement.setLong(2, accountId);
             statement.executeUpdate();
         }

@@ -45,6 +45,32 @@ public class UserDao {
         return Optional.empty();
     }
 
+    public Optional<User> findById(Connection connection, long userId) throws SQLException {
+        String sql = "SELECT id, full_name, email, password_hash, created_at FROM users WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(map(resultSet));
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public void updatePasswordHash(Connection connection, long userId, String passwordHash) throws SQLException {
+        String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, passwordHash);
+            statement.setLong(2, userId);
+            statement.executeUpdate();
+        }
+    }
+
     private User map(ResultSet resultSet) throws SQLException {
         User user = new User();
         user.setId(resultSet.getLong("id"));

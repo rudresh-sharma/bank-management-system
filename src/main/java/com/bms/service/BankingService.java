@@ -154,6 +154,20 @@ public class BankingService {
         }
     }
 
+    public void changePin(long userId, String currentPin, String newPin) throws SQLException, BankingException {
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            Account account = getExistingAccount(connection, userId);
+            verifyPin(account, currentPin);
+            validatePin(newPin);
+
+            if (SecurityUtil.matches(newPin, account.getPinHash())) {
+                throw new BankingException("New PIN must be different from the current PIN.");
+            }
+
+            accountDao.updatePinHash(connection, account.getId(), SecurityUtil.hashValue(newPin));
+        }
+    }
+
     private String generateUniqueAccountNumber(Connection connection) throws SQLException {
         String accountNumber = AccountNumberGenerator.generate();
 

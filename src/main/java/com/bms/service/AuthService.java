@@ -51,6 +51,29 @@ public class AuthService {
         }
     }
 
+    public void changePassword(long userId, String currentPassword, String newPassword)
+            throws SQLException, BankingException {
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new BankingException("Current password is required.");
+        }
+        validatePassword(newPassword);
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            User user = userDao.findById(connection, userId)
+                    .orElseThrow(() -> new BankingException("User not found."));
+
+            if (!SecurityUtil.matches(currentPassword, user.getPasswordHash())) {
+                throw new BankingException("Current password is incorrect.");
+            }
+
+            if (SecurityUtil.matches(newPassword, user.getPasswordHash())) {
+                throw new BankingException("New password must be different from the current password.");
+            }
+
+            userDao.updatePasswordHash(connection, userId, SecurityUtil.hashValue(newPassword));
+        }
+    }
+
     private void validateRegistrationInput(String fullName, String email, String password) throws BankingException {
         if (fullName == null || fullName.isBlank()) {
             throw new BankingException("Full name is required.");
@@ -58,6 +81,10 @@ public class AuthService {
         if (email == null || email.isBlank() || !email.contains("@")) {
             throw new BankingException("A valid email is required.");
         }
+        validatePassword(password);
+    }
+
+    private void validatePassword(String password) throws BankingException {
         if (password == null || password.length() < 6) {
             throw new BankingException("Password must be at least 6 characters long.");
         }

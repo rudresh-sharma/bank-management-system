@@ -101,7 +101,9 @@ public class Main {
             System.out.println("4. Transfer");
             System.out.println("5. Check Balance");
             System.out.println("6. View Account Details");
-            System.out.println("7. Logout");
+            System.out.println("7. Change Password");
+            System.out.println("8. Change PIN");
+            System.out.println("9. Logout");
 
             int choice = console.readInt("Choose an option: ");
 
@@ -112,7 +114,9 @@ public class Main {
                 case 4 -> transfer(user);
                 case 5 -> checkBalance(user);
                 case 6 -> showAccountDetails(user);
-                case 7 -> loggedIn = false;
+                case 7 -> changePassword(user);
+                case 8 -> changePin(user);
+                case 9 -> loggedIn = false;
                 default -> System.out.println("Invalid choice. Please try again.");
             }
         }
@@ -178,5 +182,25 @@ public class Main {
         System.out.println("Account Number: " + account.getAccountNumber());
         System.out.println("Balance: " + account.getBalance());
         System.out.println("Created At: " + account.getCreatedAt());
+    }
+
+    private void changePassword(User user) throws SQLException, BankingException {
+        System.out.println();
+        System.out.println("=== Change Password ===");
+
+        String currentPassword = console.readSecret("Current password: ");
+        String newPassword = console.readSecret("New password: ");
+        authService.changePassword(user.getId(), currentPassword, newPassword);
+        System.out.println("Password updated successfully.");
+    }
+
+    private void changePin(User user) throws SQLException, BankingException {
+        System.out.println();
+        System.out.println("=== Change PIN ===");
+
+        String currentPin = console.readPin("Current PIN: ");
+        String newPin = console.readPin("New 4-digit PIN: ");
+        bankingService.changePin(user.getId(), currentPin, newPin);
+        System.out.println("PIN updated successfully.");
     }
 }
